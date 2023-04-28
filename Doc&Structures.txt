@@ -1,0 +1,164 @@
+//Structure de la base de données
+SGBD = {
+	database1:{
+		collection1:{
+			"":{},
+			"":{},
+			"":{}
+		},
+		collection1:{
+			"":{},
+			"":{},
+			"":{}
+		},
+		collection1:{
+			"":{},
+			"":{},
+			"":{}
+		}
+	}
+	database2:{
+		collection1:{
+			"":{},
+			"":{},
+			"":{}
+		},
+		collection1:{
+			"":{},
+			"":{},
+			"":{}
+		},
+				collection1:{
+						"":{},
+						"":{},
+						"":{}
+					}
+			  },
+	database3:{
+				collection1:{
+						"":{},
+						"":{},
+						"":{}
+					},
+				collection1:{
+						"":{},
+						"":{},
+						"":{}
+					},
+				collection1:{
+						"":{},
+						"":{},
+						"":{}
+				}
+			}
+}
+
+************************************************************************* REQUESTS *************************************************************************
+
+*************** 1.GET ***************
+
+1.1 - Get all databases :  https/localhost:8000/
+
+1.2 - Get all collections of a specific database : https/localhost:8000/database1
+
+1.3 - Get all documents of a specific collection : https/localhost:8000/database1/collection1
+		
+1.4 - Get a specific document from a spécific collection : https/localhost:8000/database1/collection1/{documentId}
+		
+1.5 - Search for documents by specifiying a condition : https/localhost:8000/database1/collection1?name=yanis
+		
+				** type de selection :																								
+				
+					* = : égalité
+					* > : supérieur
+					* >= : supérieur ou égal
+					* < : inférieur
+					* <= : inférieur ou égal
+					* !=: différent
+					
+
+*************** 2.POST ***************
+
+2.1 - Create a database : https/localhost:8000/ => body: {dbName: "nom de la base"}
+
+2.2 - Create a collection in a specific database : https/localhost:8000/database1/ => body: {collectionName: "nom de la collection"}
+
+2.3 - Create a document in a spécific collection : https/localhost:8000/database1/collection1/ => body : {
+																									   id: auto-generated (soit auto incrémenté ou guid()), ** on l'ajoute pas
+																									   name: ....
+																									   .
+																									   .
+																									   .
+																									 }
+
+2.4 - Create multiple documents in a spécific collection : https/localhost:8000/database1/collection1/masse/ => body : 
+																														[
+																															{
+
+																															},
+																															{
+																																
+																															}
+																														]
+
+																									 
+*************** 3.PUT ***************
+
+3.1 - Update database name : https/localhost:8000/database1/ => body: {newName:"nom de la nouvelle database"};
+
+3.2 - Update collection name: https/localhost:8000/database1/collection1/ => body: {newCollectionName: "nom de la nouvelle collection"}
+
+3.3 - Update document : https/localhost:8000/database1/collection1/{id du document} => body : {
+																								id: ce sera le meme id que le document à modifier
+																								name: ....
+																								.
+																								.
+																								.
+																									 }
+3.4 - Update an attribute from a spécific document : https/localhost:8000/database1/collection1/{id du document}?{attribu}={valeur}
+
+  		* Get the specific document first : (1.4)
+		* modify the object (by updating the parameter)
+		* Update document (3.3)
+
+3.5 - Delete an attribute from a specific document : https/localhost:8000/database1/collection1/{id du document}/{attribu}
+
+		* Get the specific document first : (1.4)
+		* modify the object (by removing the parameter)
+		* Update document (3.3)																							 
+						
+
+
+*************** 4.DELETE ***************
+
+4.1 - Delete database : https/localhost:8000/database1/
+
+4.2 - Delete collection : https/localhost:8000/database1/collection1/
+
+4.3 - Delete document : https/localhost:8000/database1/collection1/{id du document}
+
+
+
+************************************************************************* SYSTEME DE SAUVEGARDE *************************************************************************
+
+- Fréquence de sauvegarde : 10 à 15 min (à déterminer en éffectuant des tests de performance).
+
+- Structure de sauvegarde : chaque base sera stoquée dans son propre fichier.JSON
+				 
+							{
+								{}, ======> ☐.json
+								{}, ======> ☐.json
+								{}  ======> ☐.json
+							}
+
+* Procédure de sauvegarde :
+	- Lors de la modification d'une base (avec un POST ou un PUT, ou DELETE), le nom de cette base sera
+	  stoquée dans un tableau de bases modifiés qui sera créé.
+	
+	- Lorsque le cycle de sauvegarde sera atteint, la fonction de sauvegarde sera declenchée.
+	  Cette dernière prendra en paramètre le tableau de bases modifiées:
+		* Si le tableau est vide : aucun actiosn de sauveragde ne sera éfféctuée.
+		* Sinon la fonction sauvegardera que les bases concernée, dans leurs fichier réspectifs.
+
+* Procedure d'initialisation :
+  L'initilisation se fera de manière asynchrone, ou chaque base de données sera chargée en mémoire dans le SGBD.
